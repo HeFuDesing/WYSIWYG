@@ -1,31 +1,163 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
+﻿<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script>
+    var oDoc, sDefTxt;
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+    function initDoc() {
+        oDoc = document.getElementById("textBox");
+        sDefTxt = oDoc.innerHTML;
+        if (document.compForm.switchMode.checked) { setDocMode(true); }
+    }
+
+    function formatDoc(sCmd, sValue) {
+        if (validateMode()) { document.execCommand(sCmd, false, sValue); oDoc.focus(); }
+    }
+
+    function validateMode() {
+        if (!document.compForm.switchMode.checked) { return true; }
+        alert("Uncheck \"Show HTML\".");
+        oDoc.focus();
+        return false;
+    }
+
+    function setDocMode(bToSource) {
+        var oContent;
+        if (bToSource) {
+            oContent = document.createTextNode(oDoc.innerHTML);
+            oDoc.innerHTML = "";
+            var oPre = document.createElement("pre");
+            oDoc.contentEditable = false;
+            oPre.id = "sourceText";
+            oPre.contentEditable = true;
+            oPre.appendChild(oContent);
+            oDoc.appendChild(oPre);
+        } else {
+            if (document.all) {
+                oDoc.innerHTML = oDoc.innerText;
+            } else {
+                oContent = document.createRange();
+                oContent.selectNodeContents(oDoc.firstChild);
+                oDoc.innerHTML = oContent.toString();
+            }
+            oDoc.contentEditable = true;
+        }
+        oDoc.focus();
+    }
+
+    function printDoc() {
+        if (!validateMode()) { return; }
+        var oPrntWin = window.open("", "_blank", "width=450,height=470,left=400,top=100,menubar=yes,toolbar=no,location=no,scrollbars=yes");
+        oPrntWin.document.open();
+        oPrntWin.document.write("<!doctype html><html><head><title>Print<\/title><\/head><body onload=\"print();\">" + oDoc.innerHTML + "<\/body><\/html>");
+        oPrntWin.document.close();
+    }
+    $(document).ready(function () {
+        initDoc();
+    });
+</script>
+
+<h1>WYSIWYG</h1>
+<hr />
+
+
+
+<form name="compForm" method="post" action="sample.php" onsubmit="if(validateMode()){this.myDoc.value=oDoc.innerHTML;return true;}return false;">
+    <input type="hidden" name="myDoc">
+    <div id="toolBar1" class="row" style="margin: 0px;">
+        <div class="input-group" style="max-width:210px; margin-right:5px;">
+            <div class="input-group-append">
+                <span class="input-group-text">Formato:</span>
+            </div>
+            <select onchange="formatDoc('formatblock',this[this.selectedIndex].value);this.selectedIndex=0;" class="form-control">
+                <option value="p" selected>Normal</option>
+                <option value="h1">Titulo</option>
+                <option value="h2">SubTitulo</option>
+            </select>
+        </div>
+        <div class="input-group" style="max-width:300px; margin-right:5px;">
+            <div class="input-group-append">
+                <span class="input-group-text">Fuente:</span>
+            </div>
+            <select onchange="formatDoc('fontname',this[this.selectedIndex].value);this.selectedIndex=0;" class="form-control">
+                <option class="heading" selected>- font -</option>
+                <option>Arial</option>
+                <option>Arial Black</option>
+                <option>Courier New</option>
+                <option>Times New Roman</option>
+            </select>
+        </div>
+        <div class="input-group" style="max-width:240px; margin-right:5px;">
+            <div class="input-group-append">
+                <span class="input-group-text">Tamaño:</span>
+            </div>
+            <select onchange="formatDoc('fontsize',this[this.selectedIndex].value);this.selectedIndex=0;" class="form-control">
+                <option value="1">Very small</option>
+                <option value="2">A bit small</option>
+                <option value="3" selected>Normal</option>
+                <option value="4">Medium-large</option>
+                <option value="5">Big</option>
+                <option value="6">Very big</option>
+                <option value="7">Maximum</option>
+            </select>
+        </div>
+        <div class="input-group" style="max-width:105px; margin-right:5px;">
+            <div class="input-group-append">
+                <span class="input-group-text">Color:</span>
+            </div>
+            <input type="color" value="black" onchange="formatDoc('forecolor',this.value);this.selectedIndex=0;" class="form-control" style="padding: 0;" />
+        </div>
+        <div class="input-group" style="max-width:110px; margin-right:5px;">
+            <div class="input-group-append">
+                <span class="input-group-text">Fondo:</span>
+            </div>
+            <input type="color" value="#fff" onchange="formatDoc('backcolor',this.value);this.selectedIndex=0;" class="form-control" style="padding: 0;" />
+        </div>
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+    <div class="row mt-2 ml-0 mr-0">
+        <div class="btn-group">
+            <button class="btn btn-outline-dark" title="Borrar Todo" onclick="if(validateMode()&&confirm('Are you sure?')){oDoc.innerHTML=sDefTxt};" type="button">
+                <i class="fa fa-eraser" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-outline-dark" title="Cortar" onclick="formatDoc('cut');" type="button">
+                <i class="fa fa-cut" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-outline-dark" title="Copiar" onclick="formatDoc('copy');" type="button">
+                <i class="fa fa-copy" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-outline-dark" title="Pegar" onclick="formatDoc('paste');" type="button">
+                <i class="fa fa-paste" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="btn-group ml-1">
+            <button class="btn btn-outline-dark" title="Deshacer" onclick="formatDoc('undo');" type="button">
+                <i class="fa fa-undo" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-outline-dark" title="Regresar" onclick="formatDoc('redo');" type="button">
+                <i class="fa fa-repeat" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-outline-dark" title="Quitar Formato" onclick="formatDoc('removeFormat');" type="button">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+            </button>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+
+    <div id="toolBar2">
+        <img class="intLink" src="data:image/gif;base64,R0lGODlhFgAWAIQbAD04KTRLYzFRjlldZl9vj1dusY14WYODhpWIbbSVFY6O7IOXw5qbms+wUbCztca0ccS4kdDQjdTLtMrL1O3YitHa7OPcsd/f4PfvrvDv8Pv5xv///////////////////yH5BAEKAB8ALAAAAAAWABYAAAV84CeOZGmeaKqubMteyzK547QoBcFWTm/jgsHq4rhMLoxFIehQQSAWR+Z4IAyaJ0kEgtFoLIzLwRE4oCQWrxoTOTAIhMCZ0tVgMBQKZHAYyFEWEV14eQ8IflhnEHmFDQkAiSkQCI2PDC4QBg+OAJc0ewadNCOgo6anqKkoIQA7" />
+        <img class="intLink" title="Print" onclick="printDoc();" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABGdBTUEAALGPC/xhBQAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9oEBxcZFmGboiwAAAAIdEVYdENvbW1lbnQA9syWvwAAAuFJREFUOMvtlUtsjFEUx//n3nn0YdpBh1abRpt4LFqtqkc3jRKkNEIsiIRIBBEhJJpKlIVo4m1RRMKKjQiRMJRUqUdKPT71qpIpiRKPaqdF55tv5vvusZjQTjOlseUkd3Xu/3dPzusC/22wtu2wRn+jG5So/OCDh8ycMJDflehMlkJkVK7KUYN+ufzA/RttH76zaVocDptRxzQtNi3mRWuPc+6cKtlXZ/sddP2uu9uXlmYXZ6Qm8v4Tz8lhF1H+zDQXt7S8oLMXtbF4e8QaFHjj3kbP2MzkktHpiTjp9VH6iHiA+whtAsX5brpwueMGdONdf/2A4M7ukDs1JW662+XkqTkeUoqjKtOjm2h53YFL15pSJ04Zc94wdtibr26fXlC2mzRvBccEbz2kiRFD414tKMlEZbVGT33+qCoHgha81SWYsew0r1uzfNylmtpx80pngQQ91LwVk2JGvGnfvZG6YcYRAT16GFtW5kKKfo1EQLtfh5Q2etT0BIWF+aitq4fDbk+ImYo1OxvGF03waFJQvBCkvDffRyEtxQiFFYgAZTHS0zwAGD7fG5TNnYNTp8/FzvGwJOfmgG7GOx0SAKKgQgDMgKBI0NJGMEImpGDk5+WACEwEd0ywblhGUZ4Hw5OdUekRBLT7DTgdEgxACsIznx8zpmWh7k4rkpJcuHDxCul6MDsmmBXDlWCH2+XozSgBnzsNCEE4euYV4pwCpsWYPW0UHDYBKSWu1NYjENDReqtKjwn2+zvtTc1vMSTB/mvev/WEYSlASsLimcOhOBJxw+N3aP/SjefNL5GePZmpu4kG7OPr1+tOfPyUu3BecWYKcwQcDFmwFKAUo90fhKDInBCAmvqnyMgqUEagQwCoHBDc1rjv9pIlD8IbVkz6qYViIBQGTJPx4k0XpIgEZoRN1Da0cij4VfR0ta3WvBXH/rjdCufv6R2zPgPH/e4pxSBCpeatqPrjNiso203/5s/zA171Mv8+w1LOAAAAAElFTkSuQmCC">
+        <img class="intLink" title="Bold" onclick="formatDoc('bold');" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAInhI+pa+H9mJy0LhdgtrxzDG5WGFVk6aXqyk6Y9kXvKKNuLbb6zgMFADs=" />
+        <img class="intLink" title="Italic" onclick="formatDoc('italic');" src="data:image/gif;base64,R0lGODlhFgAWAKEDAAAAAF9vj5WIbf///yH5BAEAAAMALAAAAAAWABYAAAIjnI+py+0Po5x0gXvruEKHrF2BB1YiCWgbMFIYpsbyTNd2UwAAOw==" />
+        <img class="intLink" title="Underline" onclick="formatDoc('underline');" src="data:image/gif;base64,R0lGODlhFgAWAKECAAAAAF9vj////////yH5BAEAAAIALAAAAAAWABYAAAIrlI+py+0Po5zUgAsEzvEeL4Ea15EiJJ5PSqJmuwKBEKgxVuXWtun+DwxCCgA7" />
+        <img class="intLink" title="Left align" onclick="formatDoc('justifyleft');" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAIghI+py+0Po5y02ouz3jL4D4JMGELkGYxo+qzl4nKyXAAAOw==" />
+        <img class="intLink" title="Center align" onclick="formatDoc('justifycenter');" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAIfhI+py+0Po5y02ouz3jL4D4JOGI7kaZ5Bqn4sycVbAQA7" />
+        <img class="intLink" title="Right align" onclick="formatDoc('justifyright');" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAIghI+py+0Po5y02ouz3jL4D4JQGDLkGYxouqzl43JyVgAAOw==" />
+        <img class="intLink" title="Numbered list" onclick="formatDoc('insertorderedlist');" src="data:image/gif;base64,R0lGODlhFgAWAMIGAAAAADljwliE35GjuaezxtHa7P///////yH5BAEAAAcALAAAAAAWABYAAAM2eLrc/jDKSespwjoRFvggCBUBoTFBeq6QIAysQnRHaEOzyaZ07Lu9lUBnC0UGQU1K52s6n5oEADs=" />
+        <img class="intLink" title="Dotted list" onclick="formatDoc('insertunorderedlist');" src="data:image/gif;base64,R0lGODlhFgAWAMIGAAAAAB1ChF9vj1iE33mOrqezxv///////yH5BAEAAAcALAAAAAAWABYAAAMyeLrc/jDKSesppNhGRlBAKIZRERBbqm6YtnbfMY7lud64UwiuKnigGQliQuWOyKQykgAAOw==" />
+        <img class="intLink" title="Quote" onclick="formatDoc('formatblock','blockquote');" src="data:image/gif;base64,R0lGODlhFgAWAIQXAC1NqjFRjkBgmT9nqUJnsk9xrFJ7u2R9qmKBt1iGzHmOrm6Sz4OXw3Odz4Cl2ZSnw6KxyqO306K63bG70bTB0rDI3bvI4P///////////////////////////////////yH5BAEKAB8ALAAAAAAWABYAAAVP4CeOZGmeaKqubEs2CekkErvEI1zZuOgYFlakECEZFi0GgTGKEBATFmJAVXweVOoKEQgABB9IQDCmrLpjETrQQlhHjINrTq/b7/i8fp8PAQA7" />
+        <img class="intLink" title="Add indentation" onclick="formatDoc('outdent');" src="data:image/gif;base64,R0lGODlhFgAWAMIHAAAAADljwliE35GjuaezxtDV3NHa7P///yH5BAEAAAcALAAAAAAWABYAAAM2eLrc/jDKCQG9F2i7u8agQgyK1z2EIBil+TWqEMxhMczsYVJ3e4ahk+sFnAgtxSQDqWw6n5cEADs=" />
+        <img class="intLink" title="Delete indentation" onclick="formatDoc('indent');" src="data:image/gif;base64,R0lGODlhFgAWAOMIAAAAADljwl9vj1iE35GjuaezxtDV3NHa7P///////////////////////////////yH5BAEAAAgALAAAAAAWABYAAAQ7EMlJq704650B/x8gemMpgugwHJNZXodKsO5oqUOgo5KhBwWESyMQsCRDHu9VOyk5TM9zSpFSr9gsJwIAOw==" />
+        <img class="intLink" title="Hyperlink" onclick="var sLnk=prompt('Write the URL here','http:\/\/');if(sLnk&&sLnk!=''&&sLnk!='http://'){formatDoc('createlink',sLnk)}" src="data:image/gif;base64,R0lGODlhFgAWAOMKAB1ChDRLY19vj3mOrpGjuaezxrCztb/I19Ha7Pv8/f///////////////////////yH5BAEKAA8ALAAAAAAWABYAAARY8MlJq7046827/2BYIQVhHg9pEgVGIklyDEUBy/RlE4FQF4dCj2AQXAiJQDCWQCAEBwIioEMQBgSAFhDAGghGi9XgHAhMNoSZgJkJei33UESv2+/4vD4TAQA7" />
     </div>
-</div>
+    <div id="textBox" contenteditable="true"><p>Lorem ipsum</p></div>
+    <p id="editMode"><input type="checkbox" name="switchMode" id="switchBox" onchange="setDocMode(this.checked);" /> <label for="switchBox">Show HTML</label></p>
+    <p><input type="submit" value="Send" /></p>
+</form>
