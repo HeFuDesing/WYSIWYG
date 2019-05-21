@@ -1,25 +1,21 @@
-﻿<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+﻿<link href="https://fonts.googleapis.com/css?family=Baloo+Bhai|Indie+Flower|Lobster|Macondo+Swash+Caps|Pacifico&display=swap" rel="stylesheet">
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
 <script>
     var oDoc, sDefTxt;
-
-
     function initDoc() {
         oDoc = document.getElementById("textBox");
         sDefTxt = oDoc.innerHTML;
         if (document.compForm.switchMode.checked) { setDocMode(true); }
     }
-
     function formatDoc(sCmd, sValue) {
         if (validateMode()) { document.execCommand(sCmd, false, sValue); oDoc.focus(); }
     }
-
     function validateMode() {
         if (!document.compForm.switchMode.checked) { return true; }
         alert("Uncheck \"Show HTML\".");
         oDoc.focus();
         return false;
     }
-
     function setDocMode(bToSource) {
         var oContent;
         if (bToSource) {
@@ -43,7 +39,6 @@
         }
         oDoc.focus();
     }
-
     function printDoc() {
         if (!validateMode()) { return; }
         var oPrntWin = window.open("", "_blank", "width=450,height=470,left=400,top=100,menubar=yes,toolbar=no,location=no,scrollbars=yes");
@@ -51,10 +46,28 @@
         oPrntWin.document.write("<!doctype html><html><head><title>Print<\/title><\/head><body onload=\"print();\">" + oDoc.innerHTML + "<\/body><\/html>");
         oPrntWin.document.close();
     }
-
     function insertImage()
     {
         formatDoc("InsertImage", document.getElementById("dirImage").value);
+    }
+    function fnAgregarTabla() {
+        var iCol = parseInt($("#tablaColumnas").val());
+        var iFil = parseInt($("#tablaFilas").val());
+        console.log("Columnas:" + iCol);
+        console.log("Filas:" + iFil);
+        var sHtml = "";
+        sHtml = "<table class='table table-bordered'>";
+        for (var i = 0; i < iFil; i++) {
+            sHtml += "<tr>";
+            for (var j = 0; j < iCol; j++) {
+                sHtml += "<td></td>";
+            }
+            sHtml += "</tr>";
+        }
+        sHtml += "</table>";
+        oDoc.focus(); 
+        document.execCommand("insertHTML", false, sHtml);
+        $('#ModalTabla').modal('toggle');
     }
     $(document).ready(function () {
         initDoc();
@@ -73,7 +86,7 @@
             <div class="input-group-append">
                 <span class="input-group-text">Formato:</span>
             </div>
-            <select onchange="formatDoc('formatblock',this[this.selectedIndex].value);this.selectedIndex=0;" class="form-control">
+            <select onchange="formatDoc('formatblock',this[this.selectedIndex].value);" class="form-control">
                 <option value="p" selected>Normal</option>
                 <option value="h1">Titulo</option>
                 <option value="h2">SubTitulo</option>
@@ -89,13 +102,18 @@
                 <option>Arial Black</option>
                 <option>Courier New</option>
                 <option>Times New Roman</option>
+                <option>Lobster</option>
+                <option>Baloo Bhai</option>
+                <option>Macondo Swash Caps</option>
+                <option>Indie Flower</option>
+                <option>Pacifico</option>
             </select>
         </div>
         <div class="input-group" style="max-width:240px; margin-right:5px;">
             <div class="input-group-append">
                 <span class="input-group-text">Tamaño:</span>
             </div>
-            <select onchange="formatDoc('fontsize',this[this.selectedIndex].value);this.selectedIndex=0;" class="form-control">
+            <select onchange="formatDoc('fontsize',this[this.selectedIndex].value);" class="form-control">
                 <option value="1">Very small</option>
                 <option value="2">A bit small</option>
                 <option value="3" selected>Normal</option>
@@ -198,6 +216,11 @@
                 <i class="fa fa-unlink" aria-hidden="true"></i>
             </button>
         </div>
+        <div class="btn-group ml-1">
+            <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#ModalTabla">
+                <i class="fa fa-table" aria-hidden="true"></i>
+            </button>
+        </div>
     </div>
     <div class="row mt-1 ml-0 mr-0 mb-1">
         <input type="text" class="form-control" id="dirImage" style="max-width:150px;" placeholder="image url..." /> 
@@ -206,7 +229,73 @@
         </button>
     </div>
 
-    <div id="textBox" contenteditable="true"><p>Lorem ipsum</p></div>
+    <div id="textBox" contenteditable="true"><p style="font-family: 'Lobster', cursive;">Lorem ipsum</p></div>
     <p id="editMode"><input type="checkbox" name="switchMode" id="switchBox" onchange="setDocMode(this.checked);" /> <label for="switchBox">Show HTML</label></p>
     @*<p><input type="submit" value="Send" /></p>*@
 </form>
+
+<div class="modal fade" id="ModalTabla" tabindex="-1" role="dialog" aria-labelledby="ModalTablaTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Insertar Tabla</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-4 text-right font-weight-bold">Columnas:</div>
+                    <div class="col-8">
+                        <input type="text" value="4" class="form-control" id="tablaColumnas" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-4 text-right font-weight-bold">Filas:</div>
+                    <div class="col-8">
+                        <input type="text" value="4" class="form-control" id="tablaFilas" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="fnAgregarTabla();">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalImagen" tabindex="-1" role="dialog" aria-labelledby="ModalImagenTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Insertar Imagen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-4 text-right font-weight-bold">Columnas:</div>
+                    <div class="col-8">
+                        <input type="text" value="4" class="form-control" id="tablaColumnas" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-4 text-right font-weight-bold">Filas:</div>
+                    <div class="col-8">
+                        <input type="text" value="4" class="form-control" id="tablaFilas" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="fnAgregarTabla();">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
