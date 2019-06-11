@@ -2,6 +2,7 @@
 <script src="~/Scripts/jquery-3.4.1.min.js"></script>
 <script>
     var oDoc, sDefTxt;
+    var iPositionActual = 0;
     function initDoc() {
         oDoc = document.getElementById("textBox");
         sDefTxt = oDoc.innerHTML;
@@ -65,9 +66,12 @@
             sHtml += "</tr>";
         }
         sHtml += "</table>";
-        oDoc.focus(); 
+        setCaretToPos(oDoc, iPositionActual);
         document.execCommand("insertHTML", false, sHtml);
         $('#ModalTabla').modal('toggle');
+    }
+    function fnObtenerPos() {
+        iPositionActual = oDoc.getCursorPosition();
     }
     $(document).ready(function () {
         initDoc();
@@ -217,16 +221,13 @@
             </button>
         </div>
         <div class="btn-group ml-1">
-            <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#ModalTabla">
+            <button type="button" class="btn btn-outline-dark" title="Insertar Tabla" data-toggle="modal" data-target="#ModalTabla" onclick="fnObtenerPos();">
                 <i class="fa fa-table" aria-hidden="true"></i>
             </button>
+            <button class="btn btn-outline-dark" title="Insertar imagen" data-toggle="modal" data-target="#ModalImagen" type="button" onclick="fnObtenerPos();">
+                <i class="fa fa-image" aria-hidden="true"></i>
+            </button>
         </div>
-    </div>
-    <div class="row mt-1 ml-0 mr-0 mb-1">
-        <input type="text" class="form-control" id="dirImage" style="max-width:150px;" placeholder="image url..." /> 
-        <button class="btn btn-outline-dark" title="Insertar imagen" onclick="insertImage();" type="button">
-            <i class="fa fa-image" aria-hidden="true"></i>
-        </button>
     </div>
 
     <div id="textBox" contenteditable="true"><p style="font-family: 'Lobster', cursive;">Lorem ipsum</p></div>
@@ -250,9 +251,7 @@
                         <input type="text" value="4" class="form-control" id="tablaColumnas" />
                     </div>
                 </div>
-            </div>
-            <div class="modal-body">
-                <div class="row">
+                <div class="row mt-2">
                     <div class="col-4 text-right font-weight-bold">Filas:</div>
                     <div class="col-8">
                         <input type="text" value="4" class="form-control" id="tablaFilas" />
@@ -277,25 +276,50 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-4 text-right font-weight-bold">Columnas:</div>
-                    <div class="col-8">
-                        <input type="text" value="4" class="form-control" id="tablaColumnas" />
+                <form id="uploader">
+                    <div class="row">
+                        <div class="col-4 text-right font-weight-bold">Seleccionar:</div>
+                        <div class="col-8">
+                            <input id="fileInput" type="file" multiple>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-4 text-right font-weight-bold">Filas:</div>
-                    <div class="col-8">
-                        <input type="text" value="4" class="form-control" id="tablaFilas" />
+                    <div class="row mt-2">
+                        <div class="col-4"></div>
+                        <div class="col-8">
+                            <input type="submit" value="Subir Archivo" class="btn btn-dark" />
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="fnAgregarTabla();">Agregar</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('uploader').onsubmit = function () {
+        var formdata = new FormData(); //FormData object
+        var fileInput = document.getElementById('fileInput');
+        //Iterating through each files selected in fileInput
+        for (i = 0; i < fileInput.files.length; i++) {
+            //Appending each file to FormData object
+            formdata.append(fileInput.files[i].name, fileInput.files[i]);
+        }
+        //Creating an XMLHttpRequest and sending
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/Home/Upload');
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log(JSON.parse(xhr.responseText));
+                var sHtml = "<img src='/Imagenes/" + JSON.parse(xhr.responseText) + "'>";
+                setCaretToPos(oDoc, iPositionActual);
+                document.execCommand("insertHTML", false, sHtml);
+                $('#ModalImagen').modal('toggle');
+            }
+        }
+        return false;
+    } 
+</script>
