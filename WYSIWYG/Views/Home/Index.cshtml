@@ -73,7 +73,17 @@
     function fnObtenerPos() {
         iPositionActual = oDoc.getCursorPosition();
     }
+    function fnRadioTamano() {
+        if ($("input[name='rTamano']:checked").val() == "Valor") {
+            document.getElementById("txtAnchuraImagen").disabled = false;
+        }
+        else {
+            document.getElementById("txtAnchuraImagen").disabled = true;
+            document.getElementById("txtAnchuraImagen").focus();
+        }
+    }
     $(document).ready(function () {
+        document.getElementById("txtAnchuraImagen").disabled = true;
         initDoc();
     });
 </script>
@@ -267,7 +277,7 @@
 </div>
 
 <div class="modal fade" id="ModalImagen" tabindex="-1" role="dialog" aria-labelledby="ModalImagenTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="min-width: 720px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalCenterTitle">Insertar Imagen</h5>
@@ -278,7 +288,7 @@
             <div class="modal-body">
                 <form id="uploader">
                     <div class="row">
-                        <div class="col-4 text-right font-weight-bold">Seleccionar:</div>
+                        <div class="col-4 text-right font-weight-bold">Subir Imagen:</div>
                         <div class="col-8">
                             <input id="fileInput" type="file" multiple>
                         </div>
@@ -287,6 +297,45 @@
                         <div class="col-4"></div>
                         <div class="col-8">
                             <input type="submit" value="Subir Archivo" class="btn btn-dark" />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row mt-2">
+                        <div class="col-4 text-right font-weight-bold">URL Imagen:</div>
+                        <div class="col-8">
+                            <input type="text" id="txtURLImgen" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-4"></div>
+                        <div class="col-8">
+                            <input type="button" value="Insertar" class="btn btn-dark" onclick="fnInsertarImagenURL();" />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row mt-2 justify-content-center">
+                        <div class="col-12 text-center font-weight-bold">Ultimas subidas <br /> Seleccione para insertar</div>
+                        @foreach (string item in ViewBag.UltimasSubidas)
+                        {
+                            string sImagen = item.Replace(Server.MapPath("~/Imagenes"), "").Remove(0, 1);
+                            <div class="col-2 align-items-center">
+                                <img src="~/Imagenes/@sImagen" class="m-1 rounded" style="max-width: 95px; max-height: 95px; border: 1px solid black;" onclick="fnInsertarImagen('/Imagenes/@sImagen')" />
+                            </div>
+                        }
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-4 text-right font-weight-bold">Titulo:</div>
+                        <div class="col-8">
+                            <input type="text" name="txtTamanoImagen" id="txtTituloImagen" class="form-control" value="" />
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-4 text-right font-weight-bold">Tamaño:</div>
+                        <div class="col-8">
+                            <input type="radio" name="rTamano" id="rTamano" onclick="fnRadioTamano();" value="100" checked /> 100% de anchura.<br />
+                            <input type="radio" name="rTamano" id="rTamano" onclick="fnRadioTamano();" value="Auto" /> anchura automatica.<br />
+                            <input type="radio" name="rTamano" id="rTamano" onclick="fnRadioTamano();" value="Valor" /> anchura manual. <input type="number" name="txtAnchuraImagen" max="100" min="0" id="txtAnchuraImagen" class="form-control" placeholder="% de anchura" />
                         </div>
                     </div>
                 </form>
@@ -313,13 +362,27 @@
         xhr.send(formdata);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                console.log(JSON.parse(xhr.responseText));
-                var sHtml = "<img src='/Imagenes/" + JSON.parse(xhr.responseText) + "'>";
-                setCaretToPos(oDoc, iPositionActual);
-                document.execCommand("insertHTML", false, sHtml);
-                $('#ModalImagen').modal('toggle');
+                fnInsertarImagen("/Imagenes/" + JSON.parse(xhr.responseText));
             }
         }
         return false;
     } 
+    function fnInsertarImagen(sImagen) {
+        var sValor = $("input[name='rTamano']:checked").val();
+        var sStyle = " style='max-width: ";
+        if (sValor == "100")
+            sStyle += " 100%;";
+        if (sValor == "Auto")
+            sStyle += " Auto;";
+        if (sValor == "Valor")
+            sStyle += document.getElementById("txtAnchuraImagen").value + "%;";
+        sStyle += "' ";
+        var sHtml = "<img title='" + document.getElementById("txtTituloImagen").value + "' src='" + sImagen + "' " + sStyle + ">";
+        setCaretToPos(oDoc, iPositionActual);
+        document.execCommand("insertHTML", false, sHtml);
+        $('#ModalImagen').modal('toggle');
+    }
+    function fnInsertarImagenURL() {
+        fnInsertarImagen(document.getElementById("txtURLImgen").value);
+    }
 </script>
