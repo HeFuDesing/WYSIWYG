@@ -8,8 +8,10 @@
     <title>WYSIWYG</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <script src="~/Scripts/prettiffy/prettify.js"></script>
+    <link href="~/Scripts/prettiffy/prettify.css" rel="stylesheet" />
 </head>
-<body>
+<body onload="PR.prettyPrint()">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">WYSIWYG</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

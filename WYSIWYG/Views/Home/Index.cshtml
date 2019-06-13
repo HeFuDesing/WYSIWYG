@@ -47,8 +47,7 @@
         oPrntWin.document.write("<!doctype html><html><head><title>Print<\/title><\/head><body onload=\"print();\">" + oDoc.innerHTML + "<\/body><\/html>");
         oPrntWin.document.close();
     }
-    function insertImage()
-    {
+    function insertImage() {
         formatDoc("InsertImage", document.getElementById("dirImage").value);
     }
     function fnAgregarTabla() {
@@ -69,6 +68,21 @@
         setCaretToPos(oDoc, iPositionActual);
         document.execCommand("insertHTML", false, sHtml);
         $('#ModalTabla').modal('toggle');
+    }
+    function fnAgregarVideo() {
+        var sHtml = '<div class="embed-responsive embed-responsive-16by9"><iframe class="embed-responsive-item" src="https://www.youtube.com/embed/' + document.getElementById("txtIdVideo").value + '?rel=0" allowfullscreen></iframe></div>';
+        setCaretToPos(oDoc, iPositionActual);
+        oDoc.focus();
+        document.execCommand("insertHTML", false, sHtml);
+        $('#ModalYoutube').modal('toggle');
+    }
+    function fnAgregarCodigo() {
+        var sHtml = '<pre class="prettyprint linenums">' + document.getElementById("textAreaCodigo").value + '</pre>';
+        setCaretToPos(oDoc, iPositionActual);
+        oDoc.focus();
+        document.execCommand("insertHTML", false, sHtml);
+        $('#ModalCodigo').modal('toggle');
+        PR.prettyPrint();
     }
     function fnObtenerPos() {
         iPositionActual = oDoc.getCursorPosition();
@@ -237,6 +251,12 @@
             <button class="btn btn-outline-dark" title="Insertar imagen" data-toggle="modal" data-target="#ModalImagen" type="button" onclick="fnObtenerPos();">
                 <i class="fa fa-image" aria-hidden="true"></i>
             </button>
+            <button class="btn btn-outline-dark" title="Insertar video youtube" data-toggle="modal" data-target="#ModalYoutube" type="button" onclick="fnObtenerPos();">
+                <i class="fa fa-youtube" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn-outline-dark" title="Insertar codigo" data-toggle="modal" data-target="#ModalCodigo" onclick="fnObtenerPos();">
+                <i class="fa fa-code" aria-hidden="true"></i>
+            </button>
         </div>
     </div>
 
@@ -245,11 +265,60 @@
     @*<p><input type="submit" value="Send" /></p>*@
 </form>
 
+<div class="modal fade" id="ModalCodigo" tabindex="-1" role="dialog" aria-labelledby="ModalCodigoTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalCodigoTitle">Insertar Codigo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <textarea rows="12" id="textAreaCodigo" style="width: 100%;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="fnAgregarCodigo();">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ModalYoutube" tabindex="-1" role="dialog" aria-labelledby="ModalYoutubeTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalYoutubeTitle">Insertar Video de Youtube</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-4 text-right font-weight-bold">Id Video:</div>
+                    <div class="col-8">
+                        <input type="text" value="4" class="form-control" id="txtIdVideo" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="fnAgregarVideo();">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="ModalTabla" tabindex="-1" role="dialog" aria-labelledby="ModalTablaTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalCenterTitle">Insertar Tabla</h5>
+                <h5 class="modal-title" id="ModalTablaTitle">Insertar Tabla</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -366,7 +435,7 @@
             }
         }
         return false;
-    } 
+    }
     function fnInsertarImagen(sImagen) {
         var sValor = $("input[name='rTamano']:checked").val();
         var sStyle = " style='max-width: ";
